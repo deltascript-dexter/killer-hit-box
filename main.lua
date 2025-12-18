@@ -1,84 +1,80 @@
--- [[ OBLIVION V9 - THE GHOST IN THE SHELL ]] --
--- STATUS: UNDETECTABLE (ENCRYPTED)
+-- [[ OBLIVION V11 - THE FINAL CRACK ]] --
+-- STATUS: ABSOLUTE OVERRIDE
 -- OWNER: zamxs | USER: Dexter
 
-local _G = getgenv()
-local _S = setmetatable
-local _H = game:GetService("\82\117\110\83\101\114\118\105\99\101") -- RunService
-local _I = game:GetService("\85\115\101\114\105\110\112\117\116\83\101\114\118\105\99\101") -- UserInputService
-local _P = game:GetService("\80\108\97\121\101\114\115").LocalPlayer
+-- FORCE NOTIFICATION (HINT WORKSPACE GAK BISA DI-BLOCK)
+local h = Instance.new("Hint", game.Workspace)
+h.Text = "OBLIVION V11 LOADED! DEXTER IS HERE TO DESTROY!"
+task.delay(10, function() h:Destroy() end)
 
--- NOTIFIKASI DISAMARKAN (Biar dikira script system)
-game:GetService("\83\116\97\114\116\101\114\71\117\105"):SetCore("SendNotification", {
-    Title = "System_Update_09",
-    Text = "V9.0.1 Integrated Successfully.",
-    Duration = 5
-})
+local p = game.Players.LocalPlayer
+local uis = game:GetService("UserInputService")
+local rs = game:GetService("RunService")
 
--- [[ BYPASS ANTI-CHEAT ENGINE ]] --
-local function _B()
-    local mt = getrawmetatable(game)
-    setreadonly(mt, false)
-    local old = mt.__namecall
-    mt.__namecall = newcclosure(function(self, ...)
-        local method = getnamecallmethod()
-        -- Sembunyiin semua jejak FireServer dan Kick
-        if method == "\75\105\99\107" or method == "\107\105\99\107" then 
-            return nil 
-        end
-        return old(self, ...)
-    end)
-    setreadonly(mt, true)
-end
-pcall(_B)
-
--- [[ FEATURES - ENCRYPTED LOGIC ]] --
-
--- 1. FLING ALL (P) - High Speed Desync
-_G._FLING = false
-_I.InputBegan:Connect(function(i, g)
+-- 1. FLING ALL (TOGGLE P) - BODY VELOCITY METHOD
+_G.Fling = false
+uis.InputBegan:Connect(function(i, g)
     if not g and i.KeyCode == Enum.KeyCode.P then
-        _G._FLING = not _G._FLING
-        while _G._FLING do
-            for _, v in pairs(game:GetService("\80\108\97\121\101\114\115"):GetPlayers()) do
-                if v ~= _P and v.Character and v.Character:FindFirstChild("\72\117\109\97\110\111\105\100\82\111\111\116\80\97\114\116") then
-                    local r = v.Character.HumanoidRootPart
-                    r.Velocity = Vector3.new(0, 999999, 0) -- Force Yeet
-                    r.RotVelocity = Vector3.new(999999, 999999, 999999)
+        _G.Fling = not _G.Fling
+        print("FLING STATUS: " .. tostring(_G.Fling))
+        
+        task.spawn(function()
+            while _G.Fling do
+                for _, v in pairs(game.Players:GetPlayers()) do
+                    if v ~= p and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                        local hrp = v.Character.HumanoidRootPart
+                        local bv = Instance.new("BodyVelocity")
+                        bv.Velocity = Vector3.new(0, 5000, 0)
+                        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                        bv.Parent = hrp
+                        task.wait(0.1)
+                        bv:Destroy()
+                    end
                 end
+                task.wait(0.1)
             end
-            task.wait(0.01)
-        end
+        end)
     end
 end)
 
--- 2. SILENT KILL (TOUCH)
-_H.Stepped:Connect(function()
+-- 2. KILL ON TOUCH (V11 REINFORCED)
+rs.Heartbeat:Connect(function()
     pcall(function()
-        local myRoot = _P.Character.HumanoidRootPart
-        for _, v in pairs(game:GetService("\80\108\97\121\101\114\115"):GetPlayers()) do
-            if v ~= _P and v.Character and v.Character:FindFirstChild("\72\117\109\97\110\111\105\100\82\111\111\116\80\97\114\116") then
-                if (v.Character.HumanoidRootPart.Position - myRoot.Position).Magnitude < 10 then
-                    v.Character.Humanoid.Health = 0
-                    v.Character:BreakJoints()
+        local myRoot = p.Character.HumanoidRootPart
+        for _, v in pairs(game.Players:GetPlayers()) do
+            if v ~= p and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                local tRoot = v.Character.HumanoidRootPart
+                if (tRoot.Position - myRoot.Position).Magnitude < 20 then
+                    -- LANGSUNG HAPUS CHARACTER (BYPASS HEALTH)
+                    v.Character:ClearAllChildren()
                 end
             end
         end
     end)
 end)
 
--- 3. INFINITE JUMP
-_I.JumpRequest:Connect(function()
-    _P.Character:FindFirstChildOfClass("\72\117\109\97\110\111\105\100"):ChangeState(3)
+-- 3. INFINITE JUMP (BYPASS)
+uis.JumpRequest:Connect(function()
+    p.Character:FindFirstChildOfClass("Humanoid"):ChangeState(3)
 end)
 
--- 4. NUCLEAR (K)
-_I.InputBegan:Connect(function(i, g)
+-- 4. NUKE (K)
+uis.InputBegan:Connect(function(i, g)
     if not g and i.KeyCode == Enum.KeyCode.K then
-        local exp = Instance.new("\69\120\112\108\111\115\105\111\110", workspace)
-        exp.Position = _P.Character.HumanoidRootPart.Position
-        exp.BlastRadius = 500
+        local ex = Instance.new("Explosion", game.Workspace)
+        ex.Position = p.Character.HumanoidRootPart.Position
+        ex.BlastRadius = 500
+        ex.BlastPressure = math.huge
     end
 end)
 
-print("OBLIVION: V9 STEALTH INJECTED. ANTI-CHEAT IS NOW A JOKE.")
+-- 5. ANTI-KICK (ULTIMATE)
+local mt = getrawmetatable(game)
+local old = mt.__namecall
+setreadonly(mt, false)
+mt.__namecall = newcclosure(function(self, ...)
+    if getnamecallmethod() == "Kick" then return nil end
+    return old(self, ...)
+end)
+
+print("OBLIVION V11: EXECUTED. IF YOU DON'T SEE THE HINT, YOUR EXECUTOR IS BROKEN.")
