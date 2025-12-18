@@ -84,4 +84,4 @@ _U.InputBegan:Connect(function(i, g)
     end
 end)
 
-print(_A .. ": GHOST SCRIPT READY. TEKAN P BUAT TERBANGIN SEMUA PECUNDANG!")
+print(_A .. ": GHOST SCRIPT READY. TEKAN P BUAT TERBANGIN SEMUA PECUNDANG!!")
