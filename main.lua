@@ -1,68 +1,70 @@
 --[[ 
-    OBLIVION OMNI-KILLER V3 
-    BYPASSING FE LIMITS VIA PHYSICS & NETWORK OWNERSHIP
-    STRICTLY FOR DELTA EXECUTOR
+    OBLIVION V4: THE WORLD EATER
+    BYPASS & COLLECTOR EDITION
 ]]
 
 local p = game:GetService("Players").LocalPlayer
 local m = p:GetMouse()
 local uis = game:GetService("UserInputService")
 
-print("OBLIVION: SIKAT SEMUA CELAH, MATI LU SEMUA!")
+print("OBLIVION V4: LOADING EVIL CODE... DONE, ANJG!")
 
--- FITUR: INFINITE JUMP (Gak usah diedit, anjg!)
-uis.JumpRequest:Connect(function()
-    p.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+-- 1. KILL & SINK (Tenggelamin 200 Studs)
+m.Button1Down:Connect(function()
+    local target = m.Target
+    if target and target.Parent and target.Parent:FindFirstChild("Humanoid") then
+        local char = target.Parent
+        if char.Name ~= p.Name then
+            -- Paksa hancurin koneksi badan (Biar ga bisa balik)
+            char:BreakJoints()
+            
+            -- Tenggelamin paksa lewat CFrame Loop
+            spawn(function()
+                for i = 1, 50 do
+                    char:TranslateBy(Vector3.new(0, -5, 0)) -- Total 250 studs ke bawah
+                    if char:FindFirstChild("HumanoidRootPart") then
+                        char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0, -10, 0)
+                    end
+                    task.wait()
+                end
+                print("OBLIVION: " .. char.Name .. " SUDAH DI NERAKA!")
+            end)
+        end
+    end
 end)
 
--- FUNGSI KILL BRUTAL (MULTI-METHOD)
-local function BrutalKill(target)
-    local char = target.Parent
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    local hrp = char:FindFirstChild("HumanoidRootPart")
+-- 2. INFINITE JUMP
+uis.JumpRequest:Connect(function()
+    if p.Character and p.Character:FindFirstChildOfClass("Humanoid") then
+        p.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+    end
+end)
 
-    if hum and hrp and char.Name ~= p.Name then
-        -- METODE 1: DAMAGE REQUEST (Kalo game punya remote event lemah)
-        hum.Health = 0
-        
-        -- METODE 2: PHYSICS DESTRUCTION (Fling/Void)
-        -- Kita paksa part karakter mereka punya velocity gila atau teleport ke neraka
-        local bypass_pos = Vector3.new(9e9, 9e9, 9e9) -- Koordinat luar angkasa
-        
-        task.spawn(function()
-            local t = tick()
-            while tick() - t < 0.5 do -- Sikat selama 0.5 detik biar fix
-                hrp.Velocity = Vector3.new(0, -1000000, 0) -- Kecepatan jatuh dewa
-                hrp.CFrame = CFrame.new(0, -500, 0) -- Paksa ke bawah map
-                task.wait()
-            end
-        end)
-        
-        -- METODE 3: BREAK JOINTS
-        char:BreakJoints() 
-        
-        warn("OBLIVION: Target " .. char.Name .. " Berhasil Dilenyapkan, Tolol!")
+-- 3. AUTO COLLECT ALL TOOLS (STOLEN MODE)
+local function GrabTools()
+    for _, item in pairs(game.Workspace:GetDescendants()) do
+        if item:IsA("Tool") or item:IsA("HopperBin") then
+            -- Paksa pindahin ke Backpack lu
+            item.Parent = p.Backpack
+            print("OBLIVION: Tool " .. item.Name .. " DICURI!")
+        end
     end
 end
 
--- TRIGGER: KLIK BADAN PLAYER
-m.Button1Down:Connect(function()
-    local target = m.Target
-    if target and target.Parent then
-        BrutalKill(target)
+-- Langsung tarik pas script jalan
+GrabTools()
+
+-- Kasih Bind key 'R' buat tarik ulang tools kalo ada yang baru spawn
+uis.InputBegan:Connect(function(input, chat)
+    if not chat and input.KeyCode == Enum.KeyCode.R then
+        GrabTools()
+        print("OBLIVION: RE-COLLECTING TOOLS, ANJG!")
     end
 end)
 
-
--- 2. INFINITE JUMP (ALWAYS ON)
-uis.JumpRequest:Connect(function()
-    p.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-end)
-
--- NOTIFIKASI SIMPLE DI CHAT
+-- NOTIFIKASI
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "OBLIVION LOADED",
-    Text = "Kill & Inf Jump Aktif, Babi!",
+    Title = "OBLIVION V4 ACTIVE",
+    Text = "Klik=Kill | Spasi=Fly | R=Curi Tool",
     Duration = 5
 })
-
