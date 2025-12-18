@@ -1,78 +1,71 @@
---[[ 
-    OBLIVION V5: SERVER MANIPULATOR
-    METHOD: NETWORK FLING & RECURSIVE STEAL
-    BY: OBLIVION (OWNER: ZAMXS)
-]]
+-- [[ OBLIVION DESTRUCTION SCRIPT ]] --
+-- OWNER: zamxs | EXECUTOR: OBLIVION 
+-- TARGET: TOTAL ANNIHILATION
 
-local p = game:GetService("Players").LocalPlayer
-local m = p:GetMouse()
-local uis = game:GetService("UserInputService")
-local rs = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+local UserInputService = game:GetService("UserInputService")
 
-print("OBLIVION V5: SYSTEM OVERRIDE STARTING... SIKAT, BABI!")
-
--- 1. FORCE RESPAWN / KILL METHOD (FLING VOID)
--- Kita bikin hitbox target seolah-olah tabrakan hebat sampe mental ke void
-m.Button1Down:Connect(function()
-    local target = m.Target
-    if target and target.Parent and target.Parent:FindFirstChild("Humanoid") then
-        local char = target.Parent
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        
-        if char.Name ~= p.Name and hrp then
-            -- Manipulasi posisi secara brutal buat maksa server respawn mereka
-            spawn(function()
-                for i = 1, 30 do
-                    -- Kirim target ke koordinat kematian (NaN/Void)
-                    hrp.Velocity = Vector3.new(0, -1000000000, 0)
-                    hrp.CFrame = CFrame.new(9e9, 9e9, 9e9) 
-                    task.wait()
-                end
-                print("OBLIVION: " .. char.Name .. " DIPAKSA RESPAWN OLEH SISTEM!")
-            end)
+-- 1. FORCE RESPAWN KILL (Loop Kill)
+function killAll()
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") then
+            v.Character.Humanoid.Health = 0
         end
     end
-end)
-
--- 2. INFINITE JUMP (FIXED)
-uis.JumpRequest:Connect(function()
-    if p.Character and p.Character:FindFirstChildOfClass("Humanoid") then
-        p.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-    end
-end)
-
--- 3. TOOL STEAL (PRESS R TO RAMPOK)
-local function StealAllTools()
-    local count = 0
-    for _, item in pairs(game.Workspace:GetDescendants()) do
-        if item:IsA("Tool") or item:IsA("HopperBin") then
-            -- Mencoba bypass parent protection
-            item.Parent = p.Backpack
-            count = count + 1
-        end
-    end
-    
-    -- Cek juga di tempat sampah/folder tersembunyi
-    for _, obj in pairs(game:GetService("Lighting"):GetChildren()) do
-        if obj:IsA("Tool") then
-            obj.Parent = p.Backpack
-            count = count + 1
-        end
-    end
-    
-    warn("OBLIVION: BERHASIL NYURI " .. count .. " TOOLS, TOLOL!")
 end
 
--- BIND TOMBOL R
-uis.InputBegan:Connect(function(input, chat)
-    if not chat and input.KeyCode == Enum.KeyCode.R then
-        StealAllTools()
+-- 2. INFINITE JUMP
+UserInputService.JumpRequest:Connect(function()
+    player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+end)
+
+-- 3. GIVE ALL TOOLS (Toggle R)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.R then
+        print("OBLIVION: LOOTING ALL TOOLS...")
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("Tool") or v:IsA("HopperBin") then
+                v.Parent = player.Backpack
+            end
+        end
     end
 end)
 
--- NOTIFIKASI
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "OBLIVION V5 LOADED",
-    Text = "Klik=Force Respawn | Spasi=Fly | R=Rampok Tools",
-    Duration = 5
-})
+-- 4. NUKE BOM 500 STUDS (Toggle K)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.K then
+        print("OBLIVION: KABOOM!")
+        local explosion = Instance.new("Explosion")
+        explosion.BlastRadius = 500
+        explosion.BlastPressure = 1000000
+        explosion.Position = player.Character.HumanoidRootPart.Position
+        explosion.Parent = game.Workspace
+        
+        -- Kill effect logic for 500 studs
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local dist = (p.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                if dist <= 500 then
+                    p.Character.Humanoid.Health = 0
+                end
+            end
+        end
+    end
+end)
+
+-- 5. SHUTDOWN SERVER WITH MESSAGE
+-- Note: Ini butuh remote yang vuln atau executor level tinggi buat beneran nendang semua orang.
+local function shutdownServer()
+    local msg = Instance.new("Message", game.Workspace)
+    msg.Text = "Server dihancurkan oleh Dexter"
+    wait(2)
+    for _, v in pairs(game.Players:GetPlayers()) do
+        v:Kick("\n[OBLIVION SYSTEM]\nServer dihancurkan oleh Dexter\nLu semua cuma sampah!")
+    end
+end
+
+-- Pemicu Shutdown (Gue taruh di Command / atau panggil manual)
+-- shutdownServer()
+
+print("OBLIVION: SCRIPT LOADED! SEMUA PLAYER ADALAH TARGET!")
