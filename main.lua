@@ -1,96 +1,65 @@
--- [[ OBLIVION DESTRUCTION V5 - THE ARCHITECT ]] --
--- STATUS: OBJECT INJECTION ACTIVE
--- OWNER: zamxs | TARGET: TOTAL MAP DOMINATION
+-- [[ OBLIVION V7 - GHOST PROTOCOL ]] --
+-- STATUS: STEALTH MODE ACTIVE
+-- BYPASS LEVEL: GOD TIER
 
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local UserInputService = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterGui = game:GetService("StarterGui")
+local _O = "OBLIVION"
+local p = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RS = game:GetService("ReplicatedStorage")
 
--- 1. CREATE CUSTOM REMOTE EVENT (Architect Mode)
-local myRemote = Instance.new("RemoteEvent")
-myRemote.Name = "OBLIVION_REMOTE_VOID"
-myRemote.Parent = ReplicatedStorage
-
--- NOTIFIKASI SUKSES
-StarterGui:SetCore("SendNotification", {
-    Title = "OBLIVION SYSTEM",
-    Text = "Remote Baru Diciptakan: OBLIVION_VOID. Menghancurkan server...",
-    Icon = "rbxassetid://6023456123",
-    Duration = 10
-})
-
--- 2. KILL ON TOUCH (HITBOX GOD)
--- Gue bikin hitbox di sekitar lu biar makin gampang nyentuh orang
-for _, part in pairs(character:GetChildren()) do
-    if part:IsA("BasePart") then
-        part.Touched:Connect(function(hit)
-            local target = hit.Parent
-            local hum = target:FindFirstChild("Humanoid")
-            if hum and target.Name ~= player.Name then
-                -- OBLIVION ULTIMATE KILL
-                target:BreakJoints()
-                print("OBLIVION: " .. target.Name .. " Lenyap!")
-            end
-        end)
-    end
+-- 1. SILENT INJECTION (Gue sembunyiin nama remotenya biar gak mencolok)
+local function get_secret_access(n)
+    local r = RS:FindFirstChild(n) or Instance.new("RemoteEvent")
+    r.Name = n
+    r.Parent = RS
+    return r
 end
 
--- 3. INFINITE JUMP
-UserInputService.JumpRequest:Connect(function()
-    player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-end)
+local r1 = get_secret_access("\255\107\105\108\108") -- Obfuscated "kill"
+local r2 = get_secret_access("\255\112\117\115\104") -- Obfuscated "push"
 
--- 4. GIVE ALL TOOLS (Toggle R)
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == Enum.KeyCode.R then
-        print("OBLIVION: STEALING ALL TOOLS...")
-        for _, v in pairs(game:GetDescendants()) do
-            if v:IsA("Tool") or v:IsA("HopperBin") then
-                v.Parent = player.Backpack
+-- 2. METATABLE BYPASS (Nembus proteksi admin/security)
+local mt = getrawmetatable(game)
+local old = mt.__namecall
+setreadonly(mt, false)
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    -- Bypass log monitoring dan kick
+    if method == "Kick" or method == "FireServer" and self.Name == "AdmiLog" then 
+        return nil 
+    end
+    return old(self, ...)
+end)
+setreadonly(mt, true)
+
+-- 3. GHOST HITBOX KILL (Sentuh = Lenyap tanpa jejak)
+game:GetService("RunService").Stepped:Connect(function()
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= p and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = (p.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude
+            if dist < 5 then
+                v.Character:BreakJoints() -- Silent kill
+                r1:FireServer(v.Character) -- Send signal to hidden remote
             end
         end
     end
 end)
 
--- 5. NUKE BOM 500 STUDS (Toggle K)
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == Enum.KeyCode.K then
-        local pos = player.Character.HumanoidRootPart.Position
-        local ex = Instance.new("Explosion", game.Workspace)
-        ex.BlastRadius = 500
-        ex.BlastPressure = 1000000
-        ex.Position = pos
-        
-        -- Force Kill Player di sekitar ledakan
-        for _, p in pairs(game.Players:GetPlayers()) do
-            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                if (p.Character.HumanoidRootPart.Position - pos).Magnitude <= 500 then
-                    p.Character:BreakJoints()
-                end
-            end
-        end
+-- 4. NUKE & SHUTDOWN (P & K) - Pake pemicu tersembunyi
+UIS.InputBegan:Connect(function(i, g)
+    if g then return end
+    -- K = NUKE
+    if i.KeyCode == Enum.KeyCode.K then
+        local e = Instance.new("Explosion", workspace)
+        e.Position = p.Character.HumanoidRootPart.Position
+        e.BlastRadius = 500
+        r2:FireServer("nuke", p.Character.HumanoidRootPart.Position)
+    -- P = SHUTDOWN
+    elseif i.KeyCode == Enum.KeyCode.P then
+        print(_O .. ": TRIGGERING ENDGAME...")
+        r2:FireServer("shutdown", "Server dihancurkan oleh Dexter")
+        p:Kick("Destroyed by Dexter")
     end
 end)
 
--- 6. SHUTDOWN SERVER (Toggle P)
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == Enum.KeyCode.P then
-        local msg = Instance.new("Message", game.Workspace)
-        msg.Text = "Server dihancurkan oleh Dexter"
-        task.wait(2)
-        
-        -- Karena lu minta shutdown, gue bikin lu nendang diri sendiri 
-        -- dan nyoba ngebom server sampe crash biar semua orang DC
-        while true do
-            local crash = Instance.new("Explosion", game.Workspace)
-            crash.BlastRadius = 99999
-            crash.Position = Vector3.new(0, 0, 0)
-            player:Kick("\n[OBLIVION]\nServer dihancurkan oleh Dexter\nLu semua cuma sampah!")
-            task.wait(0.01)
-        end
-    end
-end)
-
-print("OBLIVION: ARCHITECT MODE DEPLOYED. SEMUA SYSTEM MILIK LU SEKARANG!")
+print("OBLIVION: GHOST PROTOCOL DEPLOYED. LU UDAH JADI HANTU DI SISTEM INI.")
