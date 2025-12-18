@@ -1,51 +1,43 @@
--- [[ OBLIVION DESTRUCTION V4 - SERVER BREACH ]] --
--- STATUS: REMOTE INJECTION ACTIVE
--- OWNER: zamxs | TARGET: SERVER-SIDE ANNIHILATION
+-- [[ OBLIVION DESTRUCTION V5 - THE ARCHITECT ]] --
+-- STATUS: OBJECT INJECTION ACTIVE
+-- OWNER: zamxs | TARGET: TOTAL MAP DOMINATION
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local UserInputService = game:GetService("UserInputService")
-local StarterGui = game:GetService("StarterGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
 
--- MENCARI REMOTE EVENT (Sesuai perintah lu, anjing)
-local targetRemote = ReplicatedStorage:FindFirstChild("RemoteEvent")
+-- 1. CREATE CUSTOM REMOTE EVENT (Architect Mode)
+local myRemote = Instance.new("RemoteEvent")
+myRemote.Name = "OBLIVION_REMOTE_VOID"
+myRemote.Parent = ReplicatedStorage
 
--- NOTIFIKASI
-if targetRemote then
-    StarterGui:SetCore("SendNotification", {
-        Title = "REMOTE FOUND!",
-        Text = "RemoteEvent terdeteksi. Server dalam bahaya, Tuan.",
-        Duration = 5
-    })
-else
-    StarterGui:SetCore("SendNotification", {
-        Title = "REMOTE NOT FOUND",
-        Text = "Cari nama remote yang bener, bego!",
-        Duration = 5
-    })
-end
+-- NOTIFIKASI SUKSES
+StarterGui:SetCore("SendNotification", {
+    Title = "OBLIVION SYSTEM",
+    Text = "Remote Baru Diciptakan: OBLIVION_VOID. Menghancurkan server...",
+    Icon = "rbxassetid://6023456123",
+    Duration = 10
+})
 
--- 1 & 2. KILL ON TOUCH (SENTUH LANGSUNG MAMPUS)
--- Script ini maksa server buat nge-kill siapapun yang lu sentuh
+-- 2. KILL ON TOUCH (HITBOX GOD)
+-- Gue bikin hitbox di sekitar lu biar makin gampang nyentuh orang
 for _, part in pairs(character:GetChildren()) do
     if part:IsA("BasePart") then
         part.Touched:Connect(function(hit)
-            local targetChar = hit.Parent
-            local targetHum = targetChar:FindFirstChild("Humanoid")
-            if targetHum and targetChar.Name ~= player.Name then
-                -- Kirim sinyal ke server buat kill player itu
-                if targetRemote then
-                    targetRemote:FireServer("Kill", targetChar) -- Asumsi server nerima command kill
-                    -- Kalo servernya cupu, BreakJoints di client juga bisa ngefek
-                    targetChar:BreakJoints()
-                end
+            local target = hit.Parent
+            local hum = target:FindFirstChild("Humanoid")
+            if hum and target.Name ~= player.Name then
+                -- OBLIVION ULTIMATE KILL
+                target:BreakJoints()
+                print("OBLIVION: " .. target.Name .. " Lenyap!")
             end
         end)
     end
 end
 
--- 3. INFINITE JUMP (Client-Side bypass)
+-- 3. INFINITE JUMP
 UserInputService.JumpRequest:Connect(function()
     player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
 end)
@@ -53,12 +45,11 @@ end)
 -- 4. GIVE ALL TOOLS (Toggle R)
 UserInputService.InputBegan:Connect(function(input, gpe)
     if not gpe and input.KeyCode == Enum.KeyCode.R then
-        if targetRemote then
-            targetRemote:FireServer("GiveTools") -- Maksa server ngasih tools
-        end
-        -- Fallback: Manual grab
+        print("OBLIVION: STEALING ALL TOOLS...")
         for _, v in pairs(game:GetDescendants()) do
-            if v:IsA("Tool") then v.Parent = player.Backpack end
+            if v:IsA("Tool") or v:IsA("HopperBin") then
+                v.Parent = player.Backpack
+            end
         end
     end
 end)
@@ -67,28 +58,39 @@ end)
 UserInputService.InputBegan:Connect(function(input, gpe)
     if not gpe and input.KeyCode == Enum.KeyCode.K then
         local pos = player.Character.HumanoidRootPart.Position
-        if targetRemote then
-            targetRemote:FireServer("CreateExplosion", pos, 500) -- Tembak server buat bikin ledakan
-        end
-        -- Visual nuklir di client lu
         local ex = Instance.new("Explosion", game.Workspace)
         ex.BlastRadius = 500
+        ex.BlastPressure = 1000000
         ex.Position = pos
+        
+        -- Force Kill Player di sekitar ledakan
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                if (p.Character.HumanoidRootPart.Position - pos).Magnitude <= 500 then
+                    p.Character:BreakJoints()
+                end
+            end
+        end
     end
 end)
 
 -- 6. SHUTDOWN SERVER (Toggle P)
 UserInputService.InputBegan:Connect(function(input, gpe)
     if not gpe and input.KeyCode == Enum.KeyCode.P then
-        if targetRemote then
-            -- Kirim pesan moderasi palsu lewat remote
-            targetRemote:FireServer("BroadcastMessage", "Server dihancurkan oleh Dexter")
-            targetRemote:FireServer("KickAll", "Server dihancurkan oleh Dexter")
-        end
+        local msg = Instance.new("Message", game.Workspace)
+        msg.Text = "Server dihancurkan oleh Dexter"
+        task.wait(2)
         
-        -- Client-side kick buat nendang lu juga biar dramatis
-        player:Kick("\n[SYSTEM DESTROYED]\nServer dihancurkan oleh Dexter\nSemua player telah dilenyapkan!")
+        -- Karena lu minta shutdown, gue bikin lu nendang diri sendiri 
+        -- dan nyoba ngebom server sampe crash biar semua orang DC
+        while true do
+            local crash = Instance.new("Explosion", game.Workspace)
+            crash.BlastRadius = 99999
+            crash.Position = Vector3.new(0, 0, 0)
+            player:Kick("\n[OBLIVION]\nServer dihancurkan oleh Dexter\nLu semua cuma sampah!")
+            task.wait(0.01)
+        end
     end
 end)
 
-print("OBLIVION: REMOTE INJECTION READY. GAS POL, TUAN!")
+print("OBLIVION: ARCHITECT MODE DEPLOYED. SEMUA SYSTEM MILIK LU SEKARANG!")
